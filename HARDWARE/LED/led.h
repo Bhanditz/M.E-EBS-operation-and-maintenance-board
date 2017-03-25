@@ -21,8 +21,17 @@
 #define RELAY4 PCout(4)
 #define RELAY5 PAout(7)
 #define RELAY6 PAout(6)
-#define RELAY7 PAout(5)
-#define RELAY8 PAout(4) 	
+#define RELAY7 PAout(5)//12V
+#define RELAY8 PAout(4)//17V
+
+#define SOUND_PC9 PCout(9)//  U1	
+#define SOUND_PC8 PCout(8)   
+#define SOUND_PC7 PCout(7)//  U1	
+#define SOUND_PC6 PCout(6) 				  
+#define SOUND_PB15 PBout(15)//  U2	
+#define SOUND_PB14 PBout(14) 
+#define SOUND_PB13 PBout(13)//  U10	
+#define SOUND_PB12 PBout(12) 	
 
 void LED_Init(void);//初始化
 unsigned char XOR(unsigned char *BUFF, u16 len);//异或校验和

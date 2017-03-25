@@ -26,7 +26,10 @@ u8 index_frame_send=0;//串口回复信息帧下标
 u8 frame_send_buf[100]={0};//串口回传缓冲区
 
 void relay(u8 index);//继电器控制复位
+void sound_switch(u8 index);//音频开关切换
 u8 is_relaying=0;//正在复位标志位。0：空闲；1：正在复位；
+u8 is_soundswitching=0;//正在切换音频开关志位。0：空闲；1：正在复位；
+
 int main(void)
 {	 
 	u16 t=0;
@@ -100,8 +103,8 @@ int main(void)
 						 usart2_works=0;//处理完，标志空闲
 					}
  					/*****************************复位帧***************************************************************************/
-				 	else if((USART2_RX_BUF[1]=='r')&&(USART2_RX_BUF[2]=='s')&&(USART2_RX_BUF[3]=='e')&&(USART2_RX_BUF[4]=='_')){//复位帧
-						usart2_works=3;//接收到连接查询帧				
+				 	else if((USART2_RX_BUF[1]=='r')&&(USART2_RX_BUF[2]=='s')&&(USART2_RX_BUF[3]=='e')&&(USART2_RX_BUF[4]=='_')&&(is_relaying==0)){//复位帧
+						usart2_works=3;//接收到复位帧				
 
 						frame_send_buf[index_frame_send]='$';
 						index_frame_send++;
@@ -151,7 +154,7 @@ int main(void)
 						 usart2_works=0;//处理完，标志空闲
 					}
  					/********************************切换音频开关申请帧***************************************************************/
-				 	else if((USART2_RX_BUF[1]=='s')&&(USART2_RX_BUF[2]=='w')&&(USART2_RX_BUF[3]=='h')&&(USART2_RX_BUF[4]=='_')){//切换音频开关申请帧
+				 	else if((USART2_RX_BUF[1]=='s')&&(USART2_RX_BUF[2]=='w')&&(USART2_RX_BUF[3]=='h')&&(USART2_RX_BUF[4]=='_')&&(is_soundswitching==0)){//切换音频开关申请帧
 						usart2_works=5;//接收到连接查询帧				
 
 						frame_send_buf[index_frame_send]='$';
@@ -175,18 +178,30 @@ int main(void)
 						index_frame_send++;
 
 						temp=USART2_RX_BUF[6]-0x30;
-						if(temp==1){//音频切换
+						if(temp==1){//音频切换。0x31:切换到有线电话;0x32:切换到3G;0x33:切换到卫星电话;0x34:切换到PC输出;
 							//do something
-							relay(5);//将来若无其他语句填充，可将各循环合并为relay(temp);
+							sound_switch(1);//将来若无其他语句填充，可将各循环合并为sound_switch(temp);
 						}else if(temp==2){
 							//do something
-							relay(6);
+							sound_switch(2);
 						}else if(temp==3){
 							//do something
-							relay(7);
+							sound_switch(3);
 						}else if(temp==4){
 							//do something
-							relay(8);
+							sound_switch(4);
+						}else if(temp==5){
+							//do something
+							sound_switch(5);
+						}else if(temp==6){
+							//do something
+							sound_switch(6);
+						}else if(temp==7){
+							//do something
+							sound_switch(7);
+						}else if(temp==8){
+							//do something
+							sound_switch(8);
 						}
 
 						usart2_works=6;//发送连接查询反馈帧
@@ -295,6 +310,49 @@ int main(void)
 						 USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);//打开中断
 						 usart1_works=0;//处理完，标志空闲
 					}
+					/*******************************************继电器控制帧*************************************************************/					
+					else if((USART_RX_BUF[1]=='j')&&(USART_RX_BUF[2]=='d')&&(USART_RX_BUF[3]=='q')&&(USART_RX_BUF[4]=='_')){
+						usart1_works=7;//接收到复位帧				
+
+						frame_send_buf[index_frame_send]='$';
+						index_frame_send++;
+						frame_send_buf[index_frame_send]='j';
+						index_frame_send++;
+						frame_send_buf[index_frame_send]='d';
+						index_frame_send++;
+						frame_send_buf[index_frame_send]='q';
+						index_frame_send++;
+						frame_send_buf[index_frame_send]='_';
+						index_frame_send++;
+						frame_send_buf[index_frame_send]='_';
+						index_frame_send++;
+						frame_send_buf[index_frame_send]=USART_RX_BUF[5];
+						index_frame_send++;
+						frame_send_buf[index_frame_send]=USART_RX_BUF[6];
+						index_frame_send++;
+						if((USART_RX_BUF[6]-0x30)==1){//继电器开关控制 0x31：发射；0x32：接收；
+							//do something
+							RELAY7=0;//闭合小功放
+							delay_ms(5);
+							RELAY8=0;//闭合大功放
+						}else if((USART_RX_BUF[6]-0x30)==2){//继电器开关控制 0x31：发射；0x32：接收；
+							//do something
+							RELAY8=1;//闭合小功放
+							delay_ms(5);
+							RELAY7=1;//闭合大功放
+						}
+						frame_send_buf[index_frame_send]=XOR(frame_send_buf,index_frame_send);
+						index_frame_send++;
+						usart1_works=8;//发送复位反馈帧
+						for(t=0;t<index_frame_send;t++)
+						{
+							USART_SendData(USART1, frame_send_buf[t]);//向串口发送数据
+							while(USART_GetFlagStatus(USART1,USART_FLAG_TC)!=SET);//等待发送结束
+						}
+						 USART_RX_STA=0;//处理完毕，允许接收下一帧
+						 USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);//打开中断
+						 usart1_works=0;//处理完，标志空闲
+					}
  					/*******************************************频谱扫描，继电器控制帧*************************************************************/
 					else if((USART_RX_BUF[1]=='s')&&(USART_RX_BUF[2]=='c')&&(USART_RX_BUF[3]=='a')&&(USART_RX_BUF[4]=='_')){//频谱扫描控制帧
 						usart1_works=5;//接收到频谱扫描，继电器控制帧
@@ -344,8 +402,9 @@ int main(void)
 void frame_resent(void){
 	u8 t=0;
 	
-if((USART_RX_BUF[1]=='r')&&(USART_RX_BUF[2]=='s')&&(USART_RX_BUF[3]=='e')&&(USART_RX_BUF[4]=='_')||
-	(USART_RX_BUF[1]=='s')&&(USART_RX_BUF[2]=='c')&&(USART_RX_BUF[3]=='a')&&(USART_RX_BUF[4]=='_')
+if((USART_RX_BUF[1]=='r')&&(USART_RX_BUF[2]=='s')&&(USART_RX_BUF[3]=='e')&&(USART_RX_BUF[4]=='_')||	  //电台复位帧
+	(USART_RX_BUF[1]=='s')&&(USART_RX_BUF[2]=='c')&&(USART_RX_BUF[3]=='a')&&(USART_RX_BUF[4]=='_')||  //频谱扫描帧
+	(USART_RX_BUF[1]=='j')&&(USART_RX_BUF[2]=='d')&&(USART_RX_BUF[3]=='q')&&(USART_RX_BUF[4]=='_')	  //继电器控制帧
 	){//连接帧除外,帧校验和出错就重传
 	index_frame_send=0;
 	frame_send_buf[index_frame_send]='$';
@@ -391,13 +450,80 @@ void relay(u8 index){
 		RELAY5=1;
 	}else if(index==6){//运维另一个板子
 	    RELAY6=1;
-	}else if(index==7){//功放1
+	}else if(index==7){//12V功放
 		RELAY7=0;
-	}else if(index==8){//功放2
+	}else if(index==8){//17V功放
 		RELAY8=0;
 	}
 	TIM_Cmd(TIM4, ENABLE);//打开TIM4
 }
 
+void sound_switch(u8 index){
+	is_soundswitching=1;//开始切换。0：空闲；1：正在切换；
+	if(index==1){//音频切换 1：有线电话；2：3G；3：卫星电话；4：PC音频输出；5：；
+//		SOUND_PC9=0;
+//		SOUND_PC8=1;
 
+		SOUND_PC7=1;
+		SOUND_PC6=0;
+
+		SOUND_PB15=1;
+		SOUND_PB14=0;
+
+		SOUND_PB13=1;
+		SOUND_PB12=0;
+	}else if(index==2){
+//		SOUND_PC9=0;
+//		SOUND_PC8=1;
+
+		SOUND_PC7=0;
+		SOUND_PC6=1;
+
+		SOUND_PB15=0;
+		SOUND_PB14=1;
+
+		SOUND_PB13=0;
+		SOUND_PB12=1;
+	}else if(index==3){
+//		SOUND_PC9=0;
+//		SOUND_PC8=1;
+
+		SOUND_PC7=0;
+		SOUND_PC6=0;
+
+		SOUND_PB15=0;
+		SOUND_PB14=0;
+
+		SOUND_PB13=0;
+		SOUND_PB12=0;
+	}else if(index==4){//默认值：听筒接在PC音频输出上
+		SOUND_PC9=1;
+//		SOUND_PC8=1;
+//		SOUND_PC7=1;
+//		SOUND_PC6=0;
+//		SOUND_PB15=0;
+//		SOUND_PB14=0;
+		SOUND_PB13=1;
+		SOUND_PB12=1;
+	}else if(index==5){//自动应答
+		SOUND_PC9=0;
+		SOUND_PC8=0;
+//		SOUND_PC7=1;
+//		SOUND_PC6=0;
+//		SOUND_PB15=0;
+//		SOUND_PB14=0;
+//		SOUND_PB13=1;
+//		SOUND_PB12=0;
+	}else if(index==6){//退出自动应答，转为本地振铃音
+		SOUND_PC9=1;
+		SOUND_PC8=1;
+//		SOUND_PC7=1;
+//		SOUND_PC6=0;
+//		SOUND_PB15=0;
+//		SOUND_PB14=0;
+		SOUND_PB13=1;
+		SOUND_PB12=1;
+	}
+	is_soundswitching=0;//切换完成。0：空闲；1：正在切换；
+}
 
