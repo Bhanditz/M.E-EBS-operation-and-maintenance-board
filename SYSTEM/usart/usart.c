@@ -251,6 +251,7 @@ void uart2_init(u32 bound)
 	}
 
 u8 flag_frame_sync_usart2=0;//串口2数据帧同步标志位
+extern u8 flag_safe_soc_ok;//安全芯片是否可用标志位。0：可用；1：不可用；
 void USART2_IRQHandler(void)                	//串口2中断服务程序
 	{
 	u8 Res;		//只可以存放一个字节的数据
@@ -268,7 +269,7 @@ void USART2_IRQHandler(void)                	//串口2中断服务程序
 //			USART_RX_STA=0;
 //		}
 
-		if(((USART2_RX_STA&0x8000)==0)&&(usart2_works==0))//接收未完成
+		if(((USART2_RX_STA&0x8000)==0)&&((usart2_works==0)||(usart2_works==1)))//接收未完成
 		{
 			 if(USART2_RX_STA&0x4000)//接收到了0x0d
 				{
