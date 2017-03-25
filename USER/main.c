@@ -132,7 +132,7 @@ int main(void)
 						index_frame_send++;
 						frame_send_buf[index_frame_send]=USART2_RX_BUF[7];
 						index_frame_send++;
-						usart1_works=11;//打开广播申请帧
+						usart2_works=11;//打开广播申请帧
 						for(t=0;t<index_frame_send;t++)
 						{
 							USART_SendData(USART1, frame_send_buf[t]);//向串口1发送数据
@@ -627,6 +627,42 @@ void sound_switch(u8 index){
 
 		SOUND_PB13=0;
 		SOUND_PB12=0;
+	}else if(index==8){//有线电话振铃
+		SOUND_PC9=1;
+		SOUND_PC8=0;
+
+		SOUND_PC7=1;
+		SOUND_PC6=0;
+
+		SOUND_PB15=0;
+		SOUND_PB14=1;
+
+		SOUND_PB13=1;
+		SOUND_PB12=1;
+	}else if(index==9){	//3G振铃
+		SOUND_PC9=1;
+		SOUND_PC8=0;
+
+		SOUND_PC7=0;
+		SOUND_PC6=1;
+
+		SOUND_PB15=0;
+		SOUND_PB14=0;
+
+		SOUND_PB13=1;
+		SOUND_PB12=1;
+	}else if(index==10){	//卫星电话振铃
+		SOUND_PC9=1;
+		SOUND_PC8=0;
+
+		SOUND_PC7=0;
+		SOUND_PC6=0;
+
+		SOUND_PB15=1;
+		SOUND_PB14=0;
+
+		SOUND_PB13=1;
+		SOUND_PB12=1;
 	}
 
 	is_soundswitching=0;//切换完成。0：空闲；1：正在切换；
