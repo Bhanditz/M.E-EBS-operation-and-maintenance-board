@@ -43,8 +43,8 @@ void pin_init(void){
 
 	 GPIO_SetBits(GPIOB,GPIO_Pin_12);//PB(12)
 	 GPIO_SetBits(GPIOB,GPIO_Pin_13);//PB(13)
-	 GPIO_ResetBits(GPIOB,GPIO_Pin_14);//PB(14)
-	 GPIO_ResetBits(GPIOB,GPIO_Pin_15);//PB(15)
+	 GPIO_SetBits(GPIOB,GPIO_Pin_14);//PB(14)
+	 GPIO_SetBits(GPIOB,GPIO_Pin_15);//PB(15)
 	 
 
 	 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5|GPIO_Pin_4|GPIO_Pin_6|GPIO_Pin_7|GPIO_Pin_8|GPIO_Pin_9;
@@ -52,15 +52,15 @@ void pin_init(void){
 	 GPIO_ResetBits(GPIOC,GPIO_Pin_4);//PC(4)
 	 GPIO_ResetBits(GPIOC,GPIO_Pin_5);//PC(5)
 
-	 GPIO_ResetBits(GPIOC,GPIO_Pin_6);//PC(6)
+	 GPIO_SetBits(GPIOC,GPIO_Pin_6);//PC(6)
 	 GPIO_SetBits(GPIOC,GPIO_Pin_7);//PC(7)
 	 GPIO_SetBits(GPIOC,GPIO_Pin_8);//PC(8)
 	 GPIO_SetBits(GPIOC,GPIO_Pin_9);//PC(9)
 
 	 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5|GPIO_Pin_4|GPIO_Pin_6|GPIO_Pin_7;
 	 GPIO_Init(GPIOA, &GPIO_InitStructure);
-	 GPIO_ResetBits(GPIOA,GPIO_Pin_4);//PA(4) 48V功放
-	 GPIO_ResetBits(GPIOA,GPIO_Pin_5);//PA(5) 12V功放
+	 GPIO_SetBits(GPIOA,GPIO_Pin_4);//PA(4) 48V功放
+	 GPIO_SetBits(GPIOA,GPIO_Pin_5);//PA(5) 12V功放
 	 GPIO_ResetBits(GPIOA,GPIO_Pin_6);//PA(6)
 	 GPIO_ResetBits(GPIOA,GPIO_Pin_7);//PA(7)
 	 

@@ -10,7 +10,7 @@
 //#include "usmart.h"
 #include "gray.h"
 #include "stmflash.h"
-
+#include "ds18b20.h" 
 
 
 #define FLASH_SAVE_ADDR  0X08070000 //设置FLASH 保存地址(必须为偶数)
@@ -35,7 +35,9 @@ int main(void)
 	u16 t=0;
 	u16 len,len1;	
 	u8 xor_sum=0; 
-	u8 temp=0;//中间过程变量
+	u8 temp=0;//中间过程变量-
+
+	short temperature;//DS18B20温度
 		
 	pin_init();
 	delay_init();	    	 //延时函数初始化	  
@@ -48,12 +50,12 @@ int main(void)
 	TIM3_Int_Init(9999,7199);//1S闪一次
 //	TIM6_Int_Init(4,1199);//6K周期方波
 //	TIM7_Int_Init(4,719);//10k周期方波
-	 
+	DS18B20_Init(); 
 
 //	STMFLASH_Read(FLASH_SAVE_ADDR,(u16*)flash_temp,SIZE);
 //	fre_tmp=flash_temp[0]*10+FREQUENCY_MIN;	
 //	if(flash_temp[2]>63){
-//		flash_temp[2]=8;//默认值这是为8，对应-13dbm
+//		flash_temp[2]=8;//默认值这是为8，对应-13dbm		   
 //	}
 //
 //	if((fre_tmp>FREQUENCY_MIN)&&(fre_tmp<FREQUENCY_MAX)){send_frequency=fre_tmp;}
@@ -88,6 +90,13 @@ int main(void)
 						frame_send_buf[index_frame_send]='_';
 						index_frame_send++;
 						frame_send_buf[index_frame_send]=USART2_RX_BUF[5];
+						index_frame_send++;
+
+						temperature=222;//DS18B20_Get_Temp();
+
+						frame_send_buf[index_frame_send]=(temperature&0xFF00)>>8;
+						index_frame_send++;
+						frame_send_buf[index_frame_send]=(temperature&0x00FF);
 						index_frame_send++;
 
 						frame_send_buf[index_frame_send]=XOR(frame_send_buf,index_frame_send);
@@ -514,10 +523,10 @@ void sound_switch(u8 index){
 		SOUND_PC8=1;
 
 		SOUND_PC7=1;
-		SOUND_PC6=0;
+		SOUND_PC6=1;
 
-		SOUND_PB15=0;
-		SOUND_PB14=0;
+		SOUND_PB15=1;
+		SOUND_PB14=1;
 
 		SOUND_PB13=1;
 		SOUND_PB12=1;
