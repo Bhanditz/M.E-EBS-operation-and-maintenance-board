@@ -117,7 +117,7 @@ int main(void)
 						index_frame_send++;
 						frame_send_buf[index_frame_send]=USART2_RX_BUF[6];
 						index_frame_send++;
-
+						
 						frame_send_buf[index_frame_send]=XOR(frame_send_buf,index_frame_send);
 						index_frame_send++;
 						usart2_works=4;//发送连接查询反馈帧
@@ -126,6 +126,16 @@ int main(void)
 							USART_SendData(USART2, frame_send_buf[t]);//向串口发送数据
 							while(USART_GetFlagStatus(USART2,USART_FLAG_TC)!=SET);//等待发送结束
 						}
+						if((USART_RX_BUF[6]-0x30)==1){//复位广播板 1：有线电话；2：卫星电话；3：3G模块；4：北斗模块；5：广播板；6：其他；
+							//do something
+						}else if((USART_RX_BUF[6]-0x30)==2){
+							//do something
+						}else if((USART_RX_BUF[6]-0x30)==3){
+							//do something
+						}else if((USART_RX_BUF[6]-0x30)==4){
+							//do something
+						}
+
 						 USART2_RX_STA=0;//处理完毕，允许接收下一帧
 						 USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);//打开中断
 						 usart2_works=0;//处理完，标志空闲
@@ -158,6 +168,15 @@ int main(void)
 						{
 							USART_SendData(USART2, frame_send_buf[t]);//向串口发送数据
 							while(USART_GetFlagStatus(USART2,USART_FLAG_TC)!=SET);//等待发送结束
+						}
+						if((USART_RX_BUF[6]-0x30)==1){//切换音频
+							//do something
+						}else if((USART_RX_BUF[6]-0x30)==2){
+							//do something
+						}else if((USART_RX_BUF[6]-0x30)==3){
+							//do something
+						}else if((USART_RX_BUF[6]-0x30)==4){
+							//do something
 						}
 						 USART2_RX_STA=0;//处理完毕，允许接收下一帧
 						 USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);//打开中断
