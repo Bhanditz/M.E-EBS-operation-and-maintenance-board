@@ -17,6 +17,7 @@
 #define LED1 PEout(5)// PE5	
 
 void LED_Init(void);//初始化
-
+unsigned char XOR(unsigned char *BUFF, u16 len);//异或校验和
+void pin_init(void);
 		 				    
 #endif
