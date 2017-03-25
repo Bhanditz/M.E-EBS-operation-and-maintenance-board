@@ -38,10 +38,10 @@ void pin_init(void){
 	 GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 //推挽输出
 	 GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;		 //IO口速度为50MHz
 	 GPIO_Init(GPIOB, &GPIO_InitStructure);
-	 GPIO_ResetBits(GPIOB,GPIO_Pin_0);//PB(0)
+	 GPIO_ResetBits(GPIOB,GPIO_Pin_0);//PB(0)//继电器
 	 GPIO_ResetBits(GPIOB,GPIO_Pin_1);//PB(1)
 
-	 GPIO_SetBits(GPIOB,GPIO_Pin_12);//PB(12)
+	 GPIO_SetBits(GPIOB,GPIO_Pin_12);//PB(12)//音频开关
 	 GPIO_SetBits(GPIOB,GPIO_Pin_13);//PB(13)
 	 GPIO_SetBits(GPIOB,GPIO_Pin_14);//PB(14)
 	 GPIO_SetBits(GPIOB,GPIO_Pin_15);//PB(15)
@@ -49,18 +49,18 @@ void pin_init(void){
 
 	 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5|GPIO_Pin_4|GPIO_Pin_6|GPIO_Pin_7|GPIO_Pin_8|GPIO_Pin_9;
 	 GPIO_Init(GPIOC, &GPIO_InitStructure);
-	 GPIO_ResetBits(GPIOC,GPIO_Pin_4);//PC(4)
+	 GPIO_ResetBits(GPIOC,GPIO_Pin_4);//PC(4)//继电器
 	 GPIO_ResetBits(GPIOC,GPIO_Pin_5);//PC(5)
 
-	 GPIO_SetBits(GPIOC,GPIO_Pin_6);//PC(6)
+	 GPIO_SetBits(GPIOC,GPIO_Pin_6);//PC(6)//音频开关
 	 GPIO_SetBits(GPIOC,GPIO_Pin_7);//PC(7)
 	 GPIO_SetBits(GPIOC,GPIO_Pin_8);//PC(8)
 	 GPIO_SetBits(GPIOC,GPIO_Pin_9);//PC(9)
 
 	 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5|GPIO_Pin_4|GPIO_Pin_6|GPIO_Pin_7;
 	 GPIO_Init(GPIOA, &GPIO_InitStructure);
-	 GPIO_SetBits(GPIOA,GPIO_Pin_4);//PA(4) 48V功放
-	 GPIO_SetBits(GPIOA,GPIO_Pin_5);//PA(5) 12V功放
+	 GPIO_ResetBits(GPIOA,GPIO_Pin_4);//PA(4) 48V功放	 功放：1打开，0停止；其他：0打开，1关闭；//继电器
+	 GPIO_ResetBits(GPIOA,GPIO_Pin_5);//PA(5) 12V功放
 	 GPIO_ResetBits(GPIOA,GPIO_Pin_6);//PA(6)
 	 GPIO_ResetBits(GPIOA,GPIO_Pin_7);//PA(7)
 	 

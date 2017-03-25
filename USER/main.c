@@ -21,6 +21,7 @@ void frame_resent(void);//向上位机请求重传
 u8 usart2_works=0;//串口2工作状态指示。0：空闲；1：发送连接帧；2：接收连接反馈帧；3：发送数据帧；4：接收数据帧；
 u8 usart1_works=0;//串口1工作状态指示。0：空闲；1：接收连接帧；2：发送连接反馈帧；3：接收频谱扫描帧；4：发送频谱扫描反馈帧；
 				  //5:接收控制帧;6:发送控制反馈帧;7:接收数据帧;8:发送数据反馈帧(包括重传帧);9：数据帧无线传输中(不允许被打断)；
+				  //11:发送广播申请帧;10:接收广播申请帧;
 
 u8 index_frame_send=0;//串口回复信息帧下标
 u8 frame_send_buf[100]={0};//串口回传缓冲区
@@ -92,7 +93,7 @@ int main(void)
 						frame_send_buf[index_frame_send]=USART2_RX_BUF[5];
 						index_frame_send++;
 
-						temperature=222;//DS18B20_Get_Temp();
+						temperature=DS18B20_Get_Temp();
 
 						frame_send_buf[index_frame_send]=(temperature&0xFF00)>>8;
 						index_frame_send++;
@@ -106,6 +107,36 @@ int main(void)
 						{
 							USART_SendData(USART2, frame_send_buf[t]);//向串口发送数据
 							while(USART_GetFlagStatus(USART2,USART_FLAG_TC)!=SET);//等待发送结束
+						}
+						 USART2_RX_STA=0;//处理完毕，允许接收下一帧
+						 USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);//打开中断
+						 usart2_works=0;//处理完，标志空闲
+					}
+					/*****************************打开/结束广播申请帧**************************************************************/
+					else if((USART2_RX_BUF[1]=='p')&&(USART2_RX_BUF[2]=='p')&&(USART2_RX_BUF[3]=='p')&&(USART2_RX_BUF[4]=='_')){//链接查询帧
+						usart2_works=10;//接收到连接查询帧				
+
+						frame_send_buf[index_frame_send]='$';
+						index_frame_send++;
+						frame_send_buf[index_frame_send]='p';
+						index_frame_send++;
+						frame_send_buf[index_frame_send]='p';
+						index_frame_send++;
+						frame_send_buf[index_frame_send]='p';
+						index_frame_send++;
+						frame_send_buf[index_frame_send]='_';
+						index_frame_send++;
+						frame_send_buf[index_frame_send]=USART2_RX_BUF[5];
+						index_frame_send++;
+						frame_send_buf[index_frame_send]=USART2_RX_BUF[6];
+						index_frame_send++;
+						frame_send_buf[index_frame_send]=USART2_RX_BUF[7];
+						index_frame_send++;
+						usart1_works=11;//打开广播申请帧
+						for(t=0;t<index_frame_send;t++)
+						{
+							USART_SendData(USART1, frame_send_buf[t]);//向串口1发送数据
+							while(USART_GetFlagStatus(USART1,USART_FLAG_TC)!=SET);//注意此处是向串口一发数据,等待发送结束
 						}
 						 USART2_RX_STA=0;//处理完毕，允许接收下一帧
 						 USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);//打开中断
@@ -331,6 +362,36 @@ int main(void)
 						 USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);//打开中断
 						 usart1_works=0;//处理完，标志空闲
 					}
+					/*******************************************打开/结束广播应答帧*************************************************************/					
+					else if((USART_RX_BUF[1]=='p')&&(USART_RX_BUF[2]=='p')&&(USART_RX_BUF[3]=='p')&&(USART_RX_BUF[4]=='_')){
+						usart1_works=10;//接收到复位帧				
+
+						frame_send_buf[index_frame_send]='$';
+						index_frame_send++;
+						frame_send_buf[index_frame_send]='p';
+						index_frame_send++;
+						frame_send_buf[index_frame_send]='p';
+						index_frame_send++;
+						frame_send_buf[index_frame_send]='p';
+						index_frame_send++;
+						frame_send_buf[index_frame_send]='_';
+						index_frame_send++;
+						frame_send_buf[index_frame_send]=USART_RX_BUF[5];
+						index_frame_send++;
+						frame_send_buf[index_frame_send]=USART_RX_BUF[6];
+						index_frame_send++;
+						frame_send_buf[index_frame_send]=USART_RX_BUF[7];
+						index_frame_send++;
+						usart1_works=11;//发送复位反馈帧
+						for(t=0;t<index_frame_send;t++)
+						{
+							USART_SendData(USART2, frame_send_buf[t]);//向串口2发送数据
+							while(USART_GetFlagStatus(USART2,USART_FLAG_TC)!=SET);//等待发送结束
+						}
+						 USART_RX_STA=0;//处理完毕，允许接收下一帧
+						 USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);//打开中断
+						 usart1_works=0;//处理完，标志空闲
+					}
 					/*******************************************继电器控制帧*************************************************************/					
 					else if((USART_RX_BUF[1]=='j')&&(USART_RX_BUF[2]=='d')&&(USART_RX_BUF[3]=='q')&&(USART_RX_BUF[4]=='_')){
 						usart1_works=7;//接收到复位帧				
@@ -351,12 +412,12 @@ int main(void)
 						index_frame_send++;
 						frame_send_buf[index_frame_send]=USART_RX_BUF[6];
 						index_frame_send++;
-						if((USART_RX_BUF[6]-0x30)==1){//继电器开关控制 0x31：发射；0x32：接收；
+						if((USART_RX_BUF[6]-0x30)==1){//继电器开关控制 0x31：发射；0x32：停止;
 							//do something
 							RELAY7=1;//闭合小功放
 							delay_ms(5);
 							RELAY8=1;//闭合大功放
-						}else if((USART_RX_BUF[6]-0x30)==2){//继电器开关控制 0x31：发射；0x32：接收；
+						}else if((USART_RX_BUF[6]-0x30)==2){//继电器开关控制 0x31：发射；0x32：停止；
 							//do something
 							RELAY8=0;//闭合小功放
 							delay_ms(5);
@@ -472,9 +533,9 @@ void relay(u8 index){
 	}else if(index==6){//运维另一个板子
 	    RELAY6=1;
 	}else if(index==7){//12V功放
-		RELAY7=0;
+		RELAY7=1;
 	}else if(index==8){//48V功放
-		RELAY8=0;
+		RELAY8=1;
 	}
 	TIM_Cmd(TIM4, ENABLE);//打开TIM4
 }

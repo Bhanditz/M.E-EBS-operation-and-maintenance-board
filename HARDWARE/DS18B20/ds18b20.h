@@ -17,11 +17,11 @@
 
 //IO方向设置
 //为了精确起见，这里采用寄存器写法
-#define DS18B20_IO_IN()  {GPIOA->CRL&=0XFFFFFFF0;GPIOA->CRL|=8<<0;}
-#define DS18B20_IO_OUT() {GPIOA->CRL&=0XFFFFFFF0;GPIOA->CRL|=3<<0;}
+#define DS18B20_IO_IN()  {GPIOC->CRL&=0XFFFFFFF0;GPIOC->CRL|=8<<0;}
+#define DS18B20_IO_OUT() {GPIOC->CRL&=0XFFFFFFF0;GPIOC->CRL|=3<<0;}
 ////IO操作函数											   
-#define	DS18B20_DQ_OUT PAout(0) //数据端口	PA0 
-#define	DS18B20_DQ_IN  PAin(0)  //数据端口	PA0 
+#define	DS18B20_DQ_OUT PCout(13) //数据端口	PA0 
+#define	DS18B20_DQ_IN  PCin(13)  //数据端口	PA0 
    	
 u8 DS18B20_Init(void);//初始化DS18B20
 short DS18B20_Get_Temp(void);//获取温度
