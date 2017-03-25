@@ -25,11 +25,14 @@ u8 usart1_works=0;//串口1工作状态指示。0：空闲；1：接收连接帧；2：发送连接反馈帧
 u8 index_frame_send=0;//串口回复信息帧下标
 u8 frame_send_buf[100]={0};//串口回传缓冲区
 
+void relay(u8 index);//继电器控制复位
+u8 is_relaying=0;//正在复位标志位。0：空闲；1：正在复位；
 int main(void)
 {	 
 	u16 t=0;
 	u16 len,len1;	
 	u8 xor_sum=0; 
+	u8 temp=0;//中间过程变量
 		
 	pin_init();
 	delay_init();	    	 //延时函数初始化	  
@@ -38,9 +41,8 @@ int main(void)
 	uart2_init(115200);	 //通信软件：串口2初始化为115200
 //	KEY_Init();
  	LED_Init();			     //LED端口初始化
-//	TIM5_Int_Init(9999,7199);//安全芯片定期查询，1s中断一次，5秒查询一次
-//	TIM4_Int_Init(2999,7199);//安全芯片应答超时检测
-	TIM3_Int_Init(9999,7199);//1Khz的FSK方波
+	TIM4_Int_Init(9999,7199);
+	TIM3_Int_Init(9999,7199);//1S闪一次
 //	TIM6_Int_Init(4,1199);//6K周期方波
 //	TIM7_Int_Init(4,719);//10k周期方波
 	 
@@ -67,7 +69,7 @@ int main(void)
 				if(USART2_RX_BUF[len1-1]==xor_sum){
 					index_frame_send=0;
  					/*****************************连接查询帧*******************************************************************************/
-					if((USART2_RX_BUF[1]=='r')&&(USART2_RX_BUF[2]=='e')&&(USART2_RX_BUF[3]=='y')&&(USART2_RX_BUF[4]=='_')){//频谱扫描帧
+					if((USART2_RX_BUF[1]=='r')&&(USART2_RX_BUF[2]=='e')&&(USART2_RX_BUF[3]=='y')&&(USART2_RX_BUF[4]=='_')){//链接查询帧
 						usart2_works=1;//接收到连接查询帧				
 
 						frame_send_buf[index_frame_send]='$';
@@ -98,7 +100,7 @@ int main(void)
 						 usart2_works=0;//处理完，标志空闲
 					}
  					/*****************************复位帧***************************************************************************/
-				 	else if((USART2_RX_BUF[1]=='r')&&(USART2_RX_BUF[2]=='s')&&(USART2_RX_BUF[3]=='e')&&(USART2_RX_BUF[4]=='_')){//频谱扫描帧
+				 	else if((USART2_RX_BUF[1]=='r')&&(USART2_RX_BUF[2]=='s')&&(USART2_RX_BUF[3]=='e')&&(USART2_RX_BUF[4]=='_')){//复位帧
 						usart2_works=3;//接收到连接查询帧				
 
 						frame_send_buf[index_frame_send]='$';
@@ -120,28 +122,36 @@ int main(void)
 						
 						frame_send_buf[index_frame_send]=XOR(frame_send_buf,index_frame_send);
 						index_frame_send++;
+
+						temp=USART2_RX_BUF[6]-0x30;
+						if(temp==1){//复位广播板 0x31：有线电话；0x32：卫星电话；0x33：3G模块；0x34：北斗模块；0x35：广播板；0x36：其他；
+							//do something
+							relay(1);//将来若无其他语句填充，可将各循环合并为relay(temp);
+						}else if(temp==2){
+							//do something
+							relay(2);
+						}else if(temp==3){
+							//do something
+							relay(3);
+						}else if(temp==4){
+							//do something
+							relay(4);
+						}
+
 						usart2_works=4;//发送连接查询反馈帧
 						for(t=0;t<index_frame_send;t++)
 						{
 							USART_SendData(USART2, frame_send_buf[t]);//向串口发送数据
 							while(USART_GetFlagStatus(USART2,USART_FLAG_TC)!=SET);//等待发送结束
 						}
-						if((USART_RX_BUF[6]-0x30)==1){//复位广播板 1：有线电话；2：卫星电话；3：3G模块；4：北斗模块；5：广播板；6：其他；
-							//do something
-						}else if((USART_RX_BUF[6]-0x30)==2){
-							//do something
-						}else if((USART_RX_BUF[6]-0x30)==3){
-							//do something
-						}else if((USART_RX_BUF[6]-0x30)==4){
-							//do something
-						}
+						
 
 						 USART2_RX_STA=0;//处理完毕，允许接收下一帧
 						 USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);//打开中断
 						 usart2_works=0;//处理完，标志空闲
 					}
  					/********************************切换音频开关申请帧***************************************************************/
-				 	else if((USART2_RX_BUF[1]=='s')&&(USART2_RX_BUF[2]=='w')&&(USART2_RX_BUF[3]=='h')&&(USART2_RX_BUF[4]=='_')){//频谱扫描帧
+				 	else if((USART2_RX_BUF[1]=='s')&&(USART2_RX_BUF[2]=='w')&&(USART2_RX_BUF[3]=='h')&&(USART2_RX_BUF[4]=='_')){//切换音频开关申请帧
 						usart2_works=5;//接收到连接查询帧				
 
 						frame_send_buf[index_frame_send]='$';
@@ -163,21 +173,29 @@ int main(void)
 
 						frame_send_buf[index_frame_send]=XOR(frame_send_buf,index_frame_send);
 						index_frame_send++;
+
+						temp=USART2_RX_BUF[6]-0x30;
+						if(temp==1){//音频切换
+							//do something
+							relay(5);//将来若无其他语句填充，可将各循环合并为relay(temp);
+						}else if(temp==2){
+							//do something
+							relay(6);
+						}else if(temp==3){
+							//do something
+							relay(7);
+						}else if(temp==4){
+							//do something
+							relay(8);
+						}
+
 						usart2_works=6;//发送连接查询反馈帧
 						for(t=0;t<index_frame_send;t++)
 						{
 							USART_SendData(USART2, frame_send_buf[t]);//向串口发送数据
 							while(USART_GetFlagStatus(USART2,USART_FLAG_TC)!=SET);//等待发送结束
 						}
-						if((USART_RX_BUF[6]-0x30)==1){//切换音频
-							//do something
-						}else if((USART_RX_BUF[6]-0x30)==2){
-							//do something
-						}else if((USART_RX_BUF[6]-0x30)==3){
-							//do something
-						}else if((USART_RX_BUF[6]-0x30)==4){
-							//do something
-						}
+						
 						 USART2_RX_STA=0;//处理完毕，允许接收下一帧
 						 USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);//打开中断
 						 usart2_works=0;//处理完，标志空闲
@@ -242,7 +260,7 @@ int main(void)
 						 usart1_works=0;//处理完，标志空闲
 					}
  					/*******************************************复位帧*************************************************************/					
-					else if((USART_RX_BUF[1]=='r')&&(USART_RX_BUF[2]=='s')&&(USART_RX_BUF[3]=='e')&&(USART_RX_BUF[4]=='_')){//频谱扫描帧
+					else if((USART_RX_BUF[1]=='r')&&(USART_RX_BUF[2]=='s')&&(USART_RX_BUF[3]=='e')&&(USART_RX_BUF[4]=='_')&&(is_relaying==0)){//复位帧
 						usart1_works=3;//接收到复位帧				
 
 						frame_send_buf[index_frame_send]='$';
@@ -261,8 +279,9 @@ int main(void)
 						index_frame_send++;
 						frame_send_buf[index_frame_send]=USART_RX_BUF[6];
 						index_frame_send++;
-						if((USART_RX_BUF[6]-0x30)==5){//复位广播板 1：有线电话；2：卫星电话；3：3G模块；4：北斗模块；5：广播板；6：其他；
+						if((USART_RX_BUF[6]-0x30)==5){//复位广播板 0x31：有线电话；0x32：卫星电话；0x33：3G模块；0x34：北斗模块；0x35：广播板；0x36：其他；
 							//do something
+								relay(5);
 						}
 						frame_send_buf[index_frame_send]=XOR(frame_send_buf,index_frame_send);
 						index_frame_send++;
@@ -277,7 +296,7 @@ int main(void)
 						 usart1_works=0;//处理完，标志空闲
 					}
  					/*******************************************频谱扫描，继电器控制帧*************************************************************/
-					else if((USART_RX_BUF[1]=='s')&&(USART_RX_BUF[2]=='c')&&(USART_RX_BUF[3]=='a')&&(USART_RX_BUF[4]=='_')){//控制帧
+					else if((USART_RX_BUF[1]=='s')&&(USART_RX_BUF[2]=='c')&&(USART_RX_BUF[3]=='a')&&(USART_RX_BUF[4]=='_')){//频谱扫描控制帧
 						usart1_works=5;//接收到频谱扫描，继电器控制帧
 						frame_send_buf[index_frame_send]='$';
 						 index_frame_send++;
@@ -356,7 +375,29 @@ if((USART_RX_BUF[1]=='r')&&(USART_RX_BUF[2]=='s')&&(USART_RX_BUF[3]=='e')&&(USAR
 }
 }
 
-
+void relay(u8 index){
+	is_relaying=1;//标记正在执行复位动作
+	LED0=0;//点灯，表示正在复位
+	TIM4_Int_Init(9999,7199);//复位计数
+	if(index==1){ //有线电话
+		RELAY1=1;
+	}else if(index==2){//卫星电话
+		RELAY2=1;
+	}else if(index==3){//3G电话
+		RELAY3=1;
+	}else if(index==4){//北斗
+		RELAY4=1;
+	}else if(index==5){//电台子板
+		RELAY5=1;
+	}else if(index==6){//运维另一个板子
+	    RELAY6=1;
+	}else if(index==7){//功放1
+		RELAY7=0;
+	}else if(index==8){//功放2
+		RELAY8=0;
+	}
+	TIM_Cmd(TIM4, ENABLE);//打开TIM4
+}
 
 
 

@@ -20,32 +20,38 @@ void LED_Init(void)
  
  GPIO_InitTypeDef  GPIO_InitStructure;
  	
- RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOE, ENABLE);	 //使能PB,PE端口时钟
+ RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);	 //使能PB,PE端口时钟
 	
- GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5|GPIO_Pin_6;				 //LED0-->PB.5 端口配置
+ GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15|GPIO_Pin_14;				 //LED0-->PC14,15 端口配置
  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 //推挽输出
  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;		 //IO口速度为50MHz
- GPIO_Init(GPIOB, &GPIO_InitStructure);					 //根据设定参数初始化GPIOB.5
- GPIO_SetBits(GPIOB,GPIO_Pin_5);						 //PB.5 输出高
- GPIO_ResetBits(GPIOB,GPIO_Pin_6);
+ GPIO_Init(GPIOC, &GPIO_InitStructure);					 //根据设定参数初始化
+ GPIO_SetBits(GPIOC,GPIO_Pin_14);						 //PC14,15 输出高
+ GPIO_SetBits(GPIOC,GPIO_Pin_15);
 
- GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;	    		 //LED1-->PE.5 端口配置, 推挽输出
- GPIO_Init(GPIOE, &GPIO_InitStructure);	  				 //推挽输出 ，IO口速度为50MHz
- GPIO_SetBits(GPIOE,GPIO_Pin_5); 						 //PE.5 输出高 
 }
 
 void pin_init(void){
      GPIO_InitTypeDef  GPIO_InitStructure;
-	 RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOA, ENABLE);//使能PB、PA,端口时钟
-	 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8|GPIO_Pin_9;				 
+	 RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC|RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOA, ENABLE);//使能PC,PB,PA,端口时钟
+	 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1;				 
 	 GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 //推挽输出
 	 GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;		 //IO口速度为50MHz
 	 GPIO_Init(GPIOB, &GPIO_InitStructure);
-	 GPIO_ResetBits(GPIOB,GPIO_Pin_8); //讨厌的蜂鸣器
+	 GPIO_ResetBits(GPIOB,GPIO_Pin_0);//PB(0)
+	 GPIO_ResetBits(GPIOB,GPIO_Pin_1);//PB(1)
 
-	 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7|GPIO_Pin_4;				 //PAout(7):fsk控制信号,PA(4),给安全芯片上电
+	 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5|GPIO_Pin_4;
+	 GPIO_Init(GPIOC, &GPIO_InitStructure);
+	 GPIO_ResetBits(GPIOC,GPIO_Pin_4);//PC(4)
+	 GPIO_ResetBits(GPIOC,GPIO_Pin_5);//PC(5)
+
+	 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5|GPIO_Pin_4|GPIO_Pin_6|GPIO_Pin_7;
 	 GPIO_Init(GPIOA, &GPIO_InitStructure);
-	 GPIO_SetBits(GPIOA,GPIO_Pin_4); //安全芯片
+	 GPIO_SetBits(GPIOA,GPIO_Pin_4);//PA(4) 功放1
+	 GPIO_SetBits(GPIOA,GPIO_Pin_5);//PA(5) 功放2
+	 GPIO_ResetBits(GPIOA,GPIO_Pin_6);//PA(6)
+	 GPIO_ResetBits(GPIOA,GPIO_Pin_7);//PA(7)
 }
 
 unsigned char XOR(unsigned char *BUFF, u16 len)
