@@ -344,14 +344,14 @@ int main(void)
 						index_frame_send++;
 						if((USART_RX_BUF[6]-0x30)==1){//继电器开关控制 0x31：发射；0x32：接收；
 							//do something
-							RELAY7=0;//闭合小功放
+							RELAY7=1;//闭合小功放
 							delay_ms(5);
-							RELAY8=0;//闭合大功放
+							RELAY8=1;//闭合大功放
 						}else if((USART_RX_BUF[6]-0x30)==2){//继电器开关控制 0x31：发射；0x32：接收；
 							//do something
-							RELAY8=1;//闭合小功放
+							RELAY8=0;//闭合小功放
 							delay_ms(5);
-							RELAY7=1;//闭合大功放
+							RELAY7=0;//闭合大功放
 						}
 						frame_send_buf[index_frame_send]=XOR(frame_send_buf,index_frame_send);
 						index_frame_send++;
@@ -463,9 +463,9 @@ void relay(u8 index){
 	}else if(index==6){//运维另一个板子
 	    RELAY6=1;
 	}else if(index==7){//12V功放
-		RELAY7=1;
+		RELAY7=0;
 	}else if(index==8){//48V功放
-		RELAY8=1;
+		RELAY8=0;
 	}
 	TIM_Cmd(TIM4, ENABLE);//打开TIM4
 }
