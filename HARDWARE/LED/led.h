@@ -22,7 +22,7 @@
 #define RELAY5 PAout(7)
 #define RELAY6 PAout(6)
 #define RELAY7 PAout(5)//12V
-#define RELAY8 PAout(4)//17V
+#define RELAY8 PAout(4)//48V
 
 #define SOUND_PC9 PCout(9)//  U1	
 #define SOUND_PC8 PCout(8)   

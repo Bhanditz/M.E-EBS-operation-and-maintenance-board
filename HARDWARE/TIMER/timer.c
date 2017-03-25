@@ -96,8 +96,8 @@ void TIM4_IRQHandler(void)   //TIM4中断
 			RELAY4=0;
 			RELAY5=0;
 			RELAY6=0;
-			RELAY7=1;
-			RELAY8=1;
+			RELAY7=0;
+			RELAY8=0;
 
 			LED0=1;//复位完成
 			is_relaying=0;//标记空闲

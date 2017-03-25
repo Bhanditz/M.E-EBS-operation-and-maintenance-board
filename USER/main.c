@@ -139,6 +139,18 @@ int main(void)
 						}else if(temp==4){
 							//do something
 							relay(4);
+						}else if(temp==5){
+							//do something
+							relay(5);
+						}else if(temp==6){
+							//do something
+							relay(6);
+						}else if(temp==7){
+							//do something
+							relay(7);
+						}else if(temp==8){
+							//do something
+							relay(8);
 						}
 
 						usart2_works=4;//发送连接查询反馈帧
@@ -451,18 +463,19 @@ void relay(u8 index){
 	}else if(index==6){//运维另一个板子
 	    RELAY6=1;
 	}else if(index==7){//12V功放
-		RELAY7=0;
-	}else if(index==8){//17V功放
-		RELAY8=0;
+		RELAY7=1;
+	}else if(index==8){//48V功放
+		RELAY8=1;
 	}
 	TIM_Cmd(TIM4, ENABLE);//打开TIM4
 }
 
 void sound_switch(u8 index){
 	is_soundswitching=1;//开始切换。0：空闲；1：正在切换；
-	if(index==1){//音频切换 1：有线电话；2：3G；3：卫星电话；4：PC音频输出；5：；
-//		SOUND_PC9=0;
-//		SOUND_PC8=1;
+	if(index==1){//音频切换 1：有线电话主叫；2：3G主叫；3：卫星电话主叫；
+				 //4：默认状态; 5:有线电话被叫; 6:3G被叫; 7:卫星电话被叫;
+		SOUND_PC9=0;
+		SOUND_PC8=1;
 
 		SOUND_PC7=1;
 		SOUND_PC6=0;
@@ -472,9 +485,9 @@ void sound_switch(u8 index){
 
 		SOUND_PB13=1;
 		SOUND_PB12=0;
-	}else if(index==2){
-//		SOUND_PC9=0;
-//		SOUND_PC8=1;
+	}else if(index==2){	//3G主叫
+		SOUND_PC9=0;
+		SOUND_PC8=1;
 
 		SOUND_PC7=0;
 		SOUND_PC6=1;
@@ -484,9 +497,9 @@ void sound_switch(u8 index){
 
 		SOUND_PB13=0;
 		SOUND_PB12=1;
-	}else if(index==3){
-//		SOUND_PC9=0;
-//		SOUND_PC8=1;
+	}else if(index==3){	//卫星电话主叫
+		SOUND_PC9=0;
+		SOUND_PC8=1;
 
 		SOUND_PC7=0;
 		SOUND_PC6=0;
@@ -498,32 +511,54 @@ void sound_switch(u8 index){
 		SOUND_PB12=0;
 	}else if(index==4){//默认值：听筒接在PC音频输出上
 		SOUND_PC9=1;
-//		SOUND_PC8=1;
-//		SOUND_PC7=1;
-//		SOUND_PC6=0;
-//		SOUND_PB15=0;
-//		SOUND_PB14=0;
+		SOUND_PC8=1;
+
+		SOUND_PC7=1;
+		SOUND_PC6=0;
+
+		SOUND_PB15=0;
+		SOUND_PB14=0;
+
 		SOUND_PB13=1;
 		SOUND_PB12=1;
-	}else if(index==5){//自动应答
+	}else if(index==5){//有线电话被叫
 		SOUND_PC9=0;
 		SOUND_PC8=0;
-//		SOUND_PC7=1;
-//		SOUND_PC6=0;
-//		SOUND_PB15=0;
-//		SOUND_PB14=0;
-//		SOUND_PB13=1;
-//		SOUND_PB12=0;
-	}else if(index==6){//退出自动应答，转为本地振铃音
-		SOUND_PC9=1;
-		SOUND_PC8=1;
-//		SOUND_PC7=1;
-//		SOUND_PC6=0;
-//		SOUND_PB15=0;
-//		SOUND_PB14=0;
+
+		SOUND_PC7=1;
+		SOUND_PC6=0;
+
+		SOUND_PB15=1;
+		SOUND_PB14=0;
+
 		SOUND_PB13=1;
+		SOUND_PB12=0;
+	}else if(index==6){	//3G被叫
+		SOUND_PC9=0;
+		SOUND_PC8=0;
+
+		SOUND_PC7=0;
+		SOUND_PC6=1;
+
+		SOUND_PB15=0;
+		SOUND_PB14=1;
+
+		SOUND_PB13=0;
 		SOUND_PB12=1;
+	}else if(index==7){	//卫星电话被叫
+		SOUND_PC9=0;
+		SOUND_PC8=0;
+
+		SOUND_PC7=0;
+		SOUND_PC6=0;
+
+		SOUND_PB15=0;
+		SOUND_PB14=0;
+
+		SOUND_PB13=0;
+		SOUND_PB12=0;
 	}
+
 	is_soundswitching=0;//切换完成。0：空闲；1：正在切换；
 }
 

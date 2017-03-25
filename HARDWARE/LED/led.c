@@ -59,8 +59,8 @@ void pin_init(void){
 
 	 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5|GPIO_Pin_4|GPIO_Pin_6|GPIO_Pin_7;
 	 GPIO_Init(GPIOA, &GPIO_InitStructure);
-	 GPIO_SetBits(GPIOA,GPIO_Pin_4);//PA(4) 功放1
-	 GPIO_SetBits(GPIOA,GPIO_Pin_5);//PA(5) 功放2
+	 GPIO_ResetBits(GPIOA,GPIO_Pin_4);//PA(4) 48V功放
+	 GPIO_ResetBits(GPIOA,GPIO_Pin_5);//PA(5) 12V功放
 	 GPIO_ResetBits(GPIOA,GPIO_Pin_6);//PA(6)
 	 GPIO_ResetBits(GPIOA,GPIO_Pin_7);//PA(7)
 	 
